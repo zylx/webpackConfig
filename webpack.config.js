@@ -1,5 +1,6 @@
-const { resolve } = require("path");
+const { resolve } = require('path');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
+const VueLoaderPlugin = require('vue-loader/lib/plugin');
 const { CleanWebpackPlugin } = require('clean-webpack-plugin');
 
 module.exports = {
@@ -80,7 +81,7 @@ module.exports = {
                 ]
             },
             {
-                test: /\.(jpg|jepg|png|gif|svg)$/,
+                test: /\.(jpg|jepg|png|gif)$/,
                 use: [{
                     loader: 'url-loader',
                     options: {
@@ -93,6 +94,11 @@ module.exports = {
                 }]
             },
             {
+                //字体解析
+                test: /\.(eot|svg|ttf|woff|woff2)(\?\S*)?$/,
+                loader: 'file-loader'
+            },
+            {
                 test: /\.(html|htm)$/,
                 use: [{
                     loader: 'html-withimg-loader',
@@ -100,6 +106,24 @@ module.exports = {
                         outputPath: 'images'
                     }
                 }]
+            },
+            {
+                test: /\.vue$/,
+                use: [{
+                        loader: 'cache-loader' // 缓存loader编译的结果
+                    },
+                    {
+                        loader: 'thread-loader' // 作用使用 worker 池来运行loader，每个 worker 都是一个 node.js 进程
+                    },
+                    {
+                        loader: 'vue-loader', // 解析.vue文件
+                        options: {
+                            compilerOptions: { // 编译模板
+                                preserveWhitespace: false
+                            }
+                        }
+                    }
+                ]
             }
         ]
     },
@@ -108,6 +132,7 @@ module.exports = {
         new HtmlWebpackPlugin({
             template: resolve(__dirname, './src/index.html')
         }),
+        new VueLoaderPlugin(),
         new CleanWebpackPlugin()
     ],
     devServer: {
